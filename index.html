@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+	<h1>
+	<canvas id="drawing" width=360 height=350></canvas>
+	</h1>
+	<button style="width:106px;" onclick="slim()">-</button>
+	<p id="diameter">1</p>
+	<button style="width:106px;" onclick="thick()">+</button>
+	<canvas id="rectangle" width=360 height="50"></canvas>
+	<p  id="red">No magnetometer found.</p>
+	<p  id="green"></p>
+	<p  id="blue"></p>
+	<button class="half" type="button" id="startButton" onclick="startDraw()">Start drawing</button>
+	<button class="half" onclick="resetRGB()">Reset </button>
+	<button class="half" onclick="assignColor()">Assign Color </button>
+	<button class="half" onclick="changeColor()">Choose new Color </button>
+	
+
+	<script>
+	var thickness = 1;
+	var bool = 0;
+	function startDraw() {
+		if (bool == 0) {
+			bool = 1;
+			document.getElementById("startButton").innerHTML="Stop drawing";
+		}
+		else {
+			bool = 0;
+			document.getElementById("startButton").innerHTML="Start drawing";
+		}
+	}
+
+	var canvas_1 = document.getElementById("rectangle");
+	var context_1 = canvas_1.getContext("2d");
+	window.addEventListener("deviceorientation", function(event) {	
+		var alpha = event.alpha;
+		var beta = event.beta;
+		var gamma = event.gamma + 30;
+		if (beta > 45) {
+			beta = 45;
+		}
+		if (beta < 0) {
+			beta = 0;
+		}
+		if (gamma > 60) {
+			gamma = 60;
+		}
+		if (gamma < 0) {
+			gamma = 0;
+		}
+		document.querySelector("#red").innerHTML = "r = " + Math.floor(0.7083*alpha);
+		document.querySelector("#green").innerHTML = "g = " + Math.floor(beta*5.667);
+		document.querySelector("#blue").innerHTML = "b = " + Math.floor(gamma*4.25);
+		context_1.beginPath();
+		context_1.rect(0,0,172,50);
+		context_1.fillStyle = "rgb("+Math.floor(0.7083*alpha)+","+Math.floor(beta*5.667)+","+Math.floor(gamma*4.25)+")";
+		context_1.fill();
+		context_1.stroke();
+	}, true);
+
+	
+
+	var startX = 50;
+	var startY = 50;
+	var currentX = 0;
+	var currentY = 0;
+	var canvas_3 = document.getElementById("drawing");
+	var context_3 = canvas_3.getContext("2d");
+
+	window.ondevicemotion = function(event) {
+		var ax = Math.floor(event.accelerationIncludingGravity.x);
+		var ay = Math.floor(event.accelerationIncludingGravity.y);
+		if(bool) {
+		var lineX = startX;
+		var lineY = startY;
+		if (startX<340) {
+			if(ax < -1) {
+				currentX = 1;
+				startX += currentX;
+				if(thickness>1){
+			context_3.beginPath();
+			context_3.arc(startX, startY, thickness/4,0,2*Math.PI);
+			context_3.fill()
+			context_3.stroke();
+		}
+			}
+		}
+		if (startX>0) {
+			if(ax > 1) {
+				currentX = -1;
+				startX += currentX;
+				if(thickness>1){
+			context_3.beginPath();
+			context_3.arc(startX, startY, thickness/4,0,2*Math.PI);
+			context_3.fill()
+			context_3.stroke();
+		}
+			}
+		}
+		if (startY>0) {
+			if(ay < -1) {
+				currentY = -1;
+				startY += currentY;
+				if(thickness>1){
+			context_3.beginPath();
+			context_3.arc(startX, startY, thickness/4,0,2*Math.PI);
+			context_3.fill()
+			context_3.stroke();
+		}
+			}
+		}
+		if (startY<350) {
+			if(ay > 1) {
+				currentY = 1;
+				startY += currentY;
+				if(thickness>1){
+			context_3.beginPath();
+			context_3.arc(startX, startY, thickness/4,0,2*Math.PI);
+			context_3.fill()
+			context_3.stroke();
+		}
+			}
+		}
+		context_3.beginPath();
+		context_3.moveTo(lineX,lineY);
+		context_3.lineTo(startX, startY);
+		context_3.stroke();
+		
+	}
+	}
+
+	var canvas_2 = document.getElementById("rectangle");
+	var context_2 = canvas_2.getContext("2d");
+	context_2.beginPath();
+	context_2.fillRect(172,0,172,50);
+	context_2.fillStyle = "rgb(0,0,0)";
+	context_2.fill();
+	context_2.stroke();
+	function changeColor() {
+		var imgData = context_1.getImageData(0,0,172,50);
+		context_2.putImageData(imgData, 172, 0);
+	}
+	function assignColor(){
+		var p = context_2.getImageData(51,2,1,1).data;
+		context_3.strokeStyle = "rgb("+p[0]+","+p[1]+","+p[2]+")";
+	}
+	function thick() {
+		thickness++;
+		context_3.lineWidth = thickness;
+		document.getElementById('diameter').innerHTML =+ thickness;
+	}
+	function slim() {
+		if (thickness>0) {
+			thickness--;
+			context_3.lineWidth = thickness;
+			document.getElementById('diameter').innerHTML =+ thickness;
+		}
+	}
+	function resetRGB() {
+		var imgData = context_3.createImageData(360,350);
+		context_3.putImageData(imgData, 0, 0);
+	}
+	</script>
+
+</body>
+</html>
